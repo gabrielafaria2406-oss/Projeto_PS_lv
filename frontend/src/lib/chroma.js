@@ -30,8 +30,25 @@ export const STYLES = {
 };
 export const STYLE_ORDER = ["vermelho", "amarelo", "verde", "azul"];
 export const DEMO_SCORES = { vermelho: 18, amarelo: 22, verde: 38, azul: 22 };
-export function dominant(s) {
-    return STYLE_ORDER.reduce((a, b) => (s[b] > s[a] ? b : a));
+export const ZERO_SCORES = {
+    vermelho: 0, amarelo: 0, verde: 0, azul: 0
+};
+
+export function hasQuizResult(scores) {
+    return STYLE_ORDER.some(
+        (key) => Number(scores?.[key] || 0) > 0
+    );
+}
+export function dominant(scores) {
+    if (!hasQuizResult(scores)) {
+        return null;
+    }
+
+    return STYLE_ORDER.reduce((a, b) =>
+        Number(scores?.[b] || 0) > Number(scores?.[a] || 0)
+            ? b
+            : a
+    );
 }
 export const QUIZ = [
     { q: "Numa reunião de grupo, normalmente…", options: { vermelho: "Assumo a liderança e defino prioridades", amarelo: "Lanço ideias e animo a discussão", verde: "Garanto que todos são ouvidos", azul: "Analiso dados e coloco questões" } },
