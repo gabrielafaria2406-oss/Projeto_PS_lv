@@ -1,0 +1,57 @@
+
+.login-container,
+.register-container {
+  position: relative;
+}
+
+.auth-back {
+  position: absolute;
+  top: 22px;
+  left: 30px;
+
+  padding: 12px;
+  border: none;
+  background: transparent;
+
+  color: #303449;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.auth-back:hover {
+  text-decoration: underline;
+}
+
+.register-container {
+  padding: 75px 20px 35px;
+}
+
+.register-card {
+  max-width: 100%;
+}
+
+.register-card .auth-alt {
+  width: auto;
+  background: transparent;
+  color: #555C6A;
+  font-size: 13px;
+  margin-top: 15px;
+  padding: 10px;
+}
+
+.register-card .auth-alt:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .auth-back {
+    top: 10px;
+    left: 10px;
+  }
+
+  .login-container {
+    padding-top: 65px;
+  }
+}

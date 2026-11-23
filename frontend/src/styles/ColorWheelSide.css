@@ -1,0 +1,468 @@
+
+/* ========================================
+   CHROMA — HIPÓTESE 2
+   RODA LATERAL COM ROTAÇÃO
+   ======================================== */
+
+.sw-stage {
+  position: relative;
+  width: min(100%, 1200px);
+  min-height: 660px;
+  margin: 0 auto;
+  isolation: isolate;
+}
+
+/* ÁREA DA RODA */
+
+.sw-visual {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  width: min(42vw, 470px);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+
+  transform: translate(-50%, -50%);
+
+  transition:
+    transform 1450ms
+    cubic-bezier(.22, 1, .36, 1);
+}
+
+/* A roda desliza lentamente para a esquerda */
+
+.sw-stage--open .sw-visual {
+  transform:
+    translate(-50%, -50%)
+    translateX(clamp(-300px, -24vw, -190px));
+}
+
+/* ========================================
+   RODA CROMÁTICA
+   ======================================== */
+
+.sw-wheel {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+
+  border-radius: 50%;
+  background: #F5F1E1;
+
+  transform: rotate(var(--rotation, 0deg));
+
+  transition:
+    transform 1450ms
+    cubic-bezier(.22, 1, .36, 1);
+
+  box-shadow:
+    0 20px 55px rgba(41, 31, 31, .11),
+    0 0 0 9px rgba(255, 255, 255, .24);
+}
+
+/* QUATRO PARTES CLICÁVEIS */
+
+.sw-wheel__segment {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  z-index: 1;
+
+  transition:
+    transform 450ms cubic-bezier(.2, .8, .2, 1),
+    filter 450ms ease;
+}
+
+.sw-wheel__segment--red {
+  top: 0;
+  left: 0;
+  border-radius: 100% 0 0 0;
+  background: #EC3C3C;
+}
+
+.sw-wheel__segment--green {
+  top: 0;
+  right: 0;
+  border-radius: 0 100% 0 0;
+  background: #5DC748;
+}
+
+.sw-wheel__segment--yellow {
+  bottom: 0;
+  right: 0;
+  border-radius: 0 0 100% 0;
+  background: #F8DF3A;
+}
+
+.sw-wheel__segment--blue {
+  bottom: 0;
+  left: 0;
+  border-radius: 0 0 0 100%;
+  background: #3E84E0;
+}
+
+/* O pequeno salto ao passar o rato */
+
+.sw-wheel__segment--red:hover {
+  transform: translate(-10px, -10px) scale(1.025);
+}
+
+.sw-wheel__segment--green:hover {
+  transform: translate(10px, -10px) scale(1.025);
+}
+
+.sw-wheel__segment--yellow:hover {
+  transform: translate(10px, 10px) scale(1.025);
+}
+
+.sw-wheel__segment--blue:hover {
+  transform: translate(-10px, 10px) scale(1.025);
+}
+
+/* A cor escolhida destaca-se */
+
+.sw-wheel__segment--active {
+  z-index: 2;
+  filter:
+    drop-shadow(0 12px 13px rgba(41, 31, 31, .2));
+}
+
+.sw-wheel__segment--red.sw-wheel__segment--active {
+  transform: translate(-15px, -15px) scale(1.035);
+}
+
+.sw-wheel__segment--green.sw-wheel__segment--active {
+  transform: translate(15px, -15px) scale(1.035);
+}
+
+.sw-wheel__segment--yellow.sw-wheel__segment--active {
+  transform: translate(15px, 15px) scale(1.035);
+}
+
+.sw-wheel__segment--blue.sw-wheel__segment--active {
+  transform: translate(-15px, 15px) scale(1.035);
+}
+
+.sw-wheel__segment:focus-visible {
+  outline: 4px solid #291F1F;
+  outline-offset: -6px;
+}
+
+/* ========================================
+   CENTRO — ANEL MAIS FINO
+   ======================================== */
+
+.sw-wheel__center {
+  position: absolute;
+  inset: 21%;
+  z-index: 3;
+
+  border-radius: 50%;
+  background: #F5F1E1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 5px 25px rgba(41, 31, 31, .12);
+
+  /* Mantém a palavra CHROMA direita */
+  transform: rotate(var(--counter-rotation, 0deg));
+
+  transition:
+    transform 1450ms
+    cubic-bezier(.22, 1, .36, 1);
+}
+
+.sw-wheel__center strong {
+  color: #291F1F;
+  font-size: clamp(22px, 2.7vw, 38px);
+  font-weight: 850;
+  letter-spacing: -1.5px;
+  white-space: nowrap;
+}
+
+/* ========================================
+   BOTÃO COMEÇAR TESTE
+   ======================================== */
+
+.sw-start-button {
+  background: #291F1F;
+  color: #F5F1E1;
+
+  border: 1px solid #291F1F;
+  border-radius: 40px;
+
+  padding: 17px 36px;
+
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+
+  transition:
+    transform 300ms ease,
+    box-shadow 300ms ease;
+}
+
+.sw-start-button:hover:not(:disabled) {
+  transform: translateY(-5px);
+  box-shadow:
+    0 12px 28px rgba(41, 31, 31, .2);
+}
+
+.sw-start-button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* ========================================
+   INFORMAÇÃO À DIREITA
+   ======================================== */
+
+.sw-info {
+  position: absolute;
+
+  left: 55%;
+  top: 50%;
+
+  width: min(42%, 460px);
+  padding: 35px 30px;
+
+  border-radius: 25px;
+  border: 1px solid rgba(41, 31, 31, .08);
+
+  background: rgba(255, 253, 247, .65);
+
+  box-shadow:
+    0 20px 45px rgba(41, 31, 31, .05);
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transform: translate(70px, -50%);
+
+  transition:
+    opacity 650ms ease,
+    transform 850ms cubic-bezier(.22, 1, .36, 1),
+    visibility 0s linear 850ms;
+}
+
+/* Aparece depois de a roda começar a mover-se */
+
+.sw-stage--open .sw-info {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+
+  transform: translate(0, -50%);
+
+  transition:
+    opacity 700ms ease 600ms,
+    transform 850ms cubic-bezier(.22, 1, .36, 1) 500ms,
+    visibility 0s;
+}
+
+/* Cabeçalho do cartão */
+
+.sw-info__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 27px;
+}
+
+.sw-info__dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--selected-color);
+}
+
+.sw-info__eyebrow {
+  color: var(--selected-text);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+}
+
+.sw-info h2 {
+  color: #291F1F;
+  font-size: clamp(30px, 3.2vw, 51px);
+  line-height: 1.12;
+  letter-spacing: -.045em;
+  margin: 0 0 24px;
+}
+
+.sw-info p {
+  color: #656258;
+  font-size: clamp(16px, 1.5vw, 20px);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.sw-info__line {
+  width: 75px;
+  height: 5px;
+  margin-top: 35px;
+
+  border-radius: 20px;
+  background: var(--selected-color);
+}
+
+/* Cores conforme o estilo */
+
+.sw-info--red {
+  --selected-color: #EC3C3C;
+  --selected-text: #B92F2F;
+}
+
+.sw-info--green {
+  --selected-color: #5DC748;
+  --selected-text: #347A2C;
+}
+
+.sw-info--yellow {
+  --selected-color: #F8DF3A;
+  --selected-text: #806800;
+}
+
+.sw-info--blue {
+  --selected-color: #3E84E0;
+  --selected-text: #2866B7;
+}
+
+/* Fechar informação */
+
+.sw-info__close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+
+  width: 35px;
+  height: 35px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #EAE4D7;
+  color: #291F1F;
+
+  font-size: 25px;
+  cursor: pointer;
+
+  transition:
+    background 250ms ease,
+    transform 250ms ease;
+}
+
+.sw-info__close:hover {
+  background: #DCD3C3;
+  transform: rotate(90deg);
+}
+
+.sw-info__close:focus-visible,
+.sw-start-button:focus-visible {
+  outline: 3px solid #3E84E0;
+  outline-offset: 4px;
+}
+
+/* ========================================
+   RESPONSIVIDADE
+   ======================================== */
+
+@media (max-width: 820px) {
+  .sw-stage {
+    min-height: auto;
+    padding: 60px 0 45px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .sw-visual {
+    position: relative;
+    top: auto;
+    left: auto;
+
+    width: min(80vw, 450px);
+    transform: none;
+  }
+
+  .sw-stage--open .sw-visual {
+    transform: translateY(-10px);
+  }
+
+  .sw-info {
+    position: relative;
+    top: auto;
+    left: auto;
+
+    width: min(90%, 510px);
+    max-height: 0;
+    overflow: hidden;
+
+    padding: 0 25px;
+
+    transform: translateY(25px);
+  }
+
+  .sw-stage--open .sw-info {
+    max-height: 350px;
+    padding: 35px 25px;
+
+    transform: translateY(0);
+    transition:
+      max-height 800ms ease,
+      padding 800ms ease,
+      opacity 650ms ease 450ms,
+      transform 800ms ease 350ms,
+      visibility 0s;
+  }
+
+  .sw-info h2 {
+    font-size: 31px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sw-visual {
+    width: min(82vw, 360px);
+  }
+
+  .sw-wheel__center strong {
+    font-size: clamp(18px, 5vw, 27px);
+  }
+
+  .sw-info h2 {
+    font-size: 27px;
+  }
+
+  .sw-info p {
+    font-size: 16px;
+  }
+}
+
+/* Acessibilidade */
+
+@media (prefers-reduced-motion: reduce) {
+  .sw-visual,
+  .sw-wheel,
+  .sw-wheel__center,
+  .sw-wheel__segment,
+  .sw-info {
+    transition: none !important;
+  }
+}
