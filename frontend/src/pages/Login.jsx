@@ -5,11 +5,13 @@ import { Btn, Field } from "@/components/chroma/ui";
 import { login } from "@/lib/api";
 import { signIn } from "@/lib/session";
 function Login() {
+
     const nav = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errors, setErrors] = useState({});
     const [busy, setBusy] = useState(false);
+
     async function submit(e) {
         e.preventDefault();
         const er = {};
@@ -25,14 +27,16 @@ function Login() {
         signIn(u.name, u.email);
         nav({ to: "/inicio" });
     }
+
+    return(
     <AuthShell title="Bem-vinda de volta" text="Entra com o teu email e palavra-passe."
 >
         <form onSubmit={submit} className="space-y-5" noValidate>
-            <Field label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} />
-            <Field label="Palavra-passe" type="password" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} />
+            <Field label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} placeholder="email@exemplo.com" />
+            <Field label="Palavra-passe" type="password" value={password } onChange={(e) => setPassword(e.target.value)} error={errors.password} placeholder="password" />
             <Btn type="submit" disabled={busy} className="w-full">{busy ? "A entrar…" : "Entrar"}</Btn>
         </form>
         <p className="mt-6 text-center text-sm text-muted-foreground">Ainda não tens conta? <Link to="/registo" className="font-semibold text-foreground underline-offset-4 hover:underline">Criar conta</Link></p>
-    </AuthShell>;
+    </AuthShell>)
 }
 export default Login;
