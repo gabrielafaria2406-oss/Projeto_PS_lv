@@ -1,10 +1,15 @@
+
 import { Link } from "@tanstack/react-router";
+import logoChroma from "@/assets/chroma-logo2.png";
+
 export function Logo({ to = "/" }) {
-    return (<Link to={to} className="flex items-center gap-2.5">
-      <span className="grid size-6 grid-cols-2 overflow-hidden rounded-full">
-        <span className="bg-chroma-red"/><span className="bg-chroma-yellow"/>
-        <span className="bg-chroma-blue"/><span className="bg-chroma-green"/>
-      </span>
-      <span className="font-display text-xl font-semibold tracking-[0.18em]">CHROMA</span>
-    </Link>);
+    return (
+        <Link to={to} className="flex items-center">
+            <img
+                src={logoChroma}
+                alt="CHROMA"
+                className="w-50 h-auto object-contain -ml-4"
+            />
+        </Link>
+    );
 }

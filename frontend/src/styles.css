@@ -62,8 +62,8 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --font-display: "Fraunces", Georgia, serif;
-  --font-sans: "Manrope", system-ui, sans-serif;
+  --font-display: "Inter", sans-serif;
+  --font-sans: "Inter", sans-serif;
   --color-cream: var(--cream);
   --color-ink: var(--ink);
   --color-chroma-red: var(--chroma-red);
@@ -84,10 +84,11 @@
   --radius: 1rem;
   --cream: oklch(0.955 0.022 95);
   --ink: oklch(0.24 0.015 20);
-  --chroma-red: oklch(0.58 0.15 23);
-  --chroma-yellow: oklch(0.8 0.13 80);
-  --chroma-green: oklch(0.67 0.07 160);
-  --chroma-blue: oklch(0.62 0.08 250);
+--chroma-red: #EF393E;
+--chroma-yellow: #F8DD3F;
+--chroma-green: #5AC846;
+--chroma-blue: #3F85E5;
+
   --background: var(--cream);
   --foreground: var(--ink);
   --card: oklch(1 0 0);
