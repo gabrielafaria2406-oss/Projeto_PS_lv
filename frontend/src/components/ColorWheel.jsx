@@ -1,258 +1,172 @@
 
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { communicationStyles } from "../data/communicationStyles";
-import "../styles/ColorWheel.css";
+import { useState } from "react";
+import { STYLES, STYLE_ORDER } from "@/lib/chroma";
 
-// Desenha a roda e as quatro áreas clicáveis
-function WheelFace({
-  selectedStyle,
-  expanded = false,
-  onSelect,
-  onClose,
-  closeRef
-}) {
-  return (
-    <div className={`cw-face ${expanded ? "cw-face--expanded" : ""}`}>
+// Calcula a geometria dos segmentos da roda
+function arc(cx, cy, r1, r2, a0, a1) {
+    const p = (r, a) =>
+        [
+            cx + r * Math.cos(a),
+            cy + r * Math.sin(a)
+        ]
+            .map((n) => n.toFixed(2))
+            .join(" ");
 
-      {communicationStyles.map((style) => (
-        <button
-          key={style.id}
-          type="button"
-          className={`cw-slice cw-slice--${style.id} ${
-            expanded && selectedStyle?.id === style.id
-              ? "cw-slice--selected"
-              : ""
-          }`}
-          aria-label={`Descobrir o estilo ${style.name}`}
-          aria-pressed={
-            expanded ? selectedStyle?.id === style.id : false
-          }
-          onClick={(event) => onSelect(style, event)}
-        />
-      ))}
+    const large = a1 - a0 > Math.PI ? 1 : 0;
 
-      <div className="cw-center">
-
-        <strong
-          className={`cw-wordmark ${
-            expanded ? "cw-wordmark--hidden" : ""
-          }`}
-        >
-          CHROMA
-        </strong>
-
-        {selectedStyle && (
-          <div
-            className={`cw-details ${
-              expanded ? "cw-details--visible" : ""
-            }`}
-          >
-            <div className="cw-details__inner" key={selectedStyle.id}>
-
-              <button
-                ref={closeRef}
-                className="cw-close"
-                type="button"
-                onClick={onClose}
-                aria-label="Fechar descrição e voltar à roda"
-              >
-                ×
-              </button>
-
-              <span
-                className={`cw-details__label cw-details__label--${selectedStyle.id}`}
-              >
-                {selectedStyle.name}
-              </span>
-
-              <h2>{selectedStyle.title}</h2>
-              <p>{selectedStyle.description}</p>
-
-            </div>
-          </div>
-        )}
-
-      </div>
-    </div>
-  );
+    return `M ${p(r2, a0)}
+            A ${r2} ${r2} 0 ${large} 1 ${p(r2, a1)}
+            L ${p(r1, a1)}
+            A ${r1} ${r1} 0 ${large} 0 ${p(r1, a0)}
+            Z`;
 }
 
-export default function ColorWheel() {
-  const originalWheelRef = useRef(null);
-  const lastClickedRef = useRef(null);
-  const closeButtonRef = useRef(null);
+// Componente reutilizável da roda de cores
+export function ColorWheel({
+    scores,
+    highlight,
+    center,
+    className = ""
+}) {
 
-  const [zoom, setZoom] = useState(null);
-  const [expanded, setExpanded] = useState(false);
+    // Estados de interação
+    const [hover, setHover] = useState(null);
+    const [selected, setSelected] = useState(null);
 
-  const zoomMounted = zoom !== null;
+    const total = scores
+        ? STYLE_ORDER.reduce((a, k) => a + scores[k], 0)
+        : 4;
 
-  // Mede a roda para começar o zoom no sítio certo
-  function openZoom(style, event) {
-    const rect = originalWheelRef.current?.getBoundingClientRect();
+    let a = -Math.PI / 2;
 
-    if (!rect) return;
+    const gap = 0.035;
 
-    lastClickedRef.current = event.currentTarget;
+    const currentStyle = hover ?? selected;
+    const active = currentStyle ?? highlight;
 
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    // O círculo aberto ultrapassa a altura do ecrã
-    const finalSize =
-      viewportWidth <= 700
-        ? Math.min(viewportWidth * 1.42, viewportHeight * 1.05)
-        : Math.min(
-            viewportHeight * 1.56,
-            viewportWidth * 1.18,
-            1600
-          );
-
-    setExpanded(false);
-
-    setZoom({
-      style,
-      size: finalSize,
-      startScale: rect.width / finalSize,
-      shiftX:
-        rect.left + rect.width / 2 - viewportWidth / 2,
-      shiftY:
-        rect.top + rect.height / 2 - viewportHeight / 2
-    });
-  }
-
-  // Fecha o zoom e regressa ao tamanho original
-  function closeZoom() {
-    if (!zoomMounted) return;
-
-    if (
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      setExpanded(false);
-      setZoom(null);
-
-      requestAnimationFrame(() => {
-        lastClickedRef.current?.focus();
-      });
-
-      return;
+    // Seleciona ou desmarca um estilo
+    function selectStyle(key) {
+        setSelected((previous) =>
+            previous === key ? null : key
+        );
     }
 
-    setExpanded(false);
-  }
+    return (
+        <div className={`relative aspect-square ${className}`}>
 
-  // Preparar animação e impedir scroll durante o zoom
-  useEffect(() => {
-    if (!zoomMounted) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    let secondFrame = 0;
-
-    const firstFrame = requestAnimationFrame(() => {
-      secondFrame = requestAnimationFrame(() => {
-        setExpanded(true);
-      });
-    });
-
-    function handleEscape(event) {
-      if (event.key === "Escape") {
-        closeZoom();
-      }
-    }
-
-    window.addEventListener("keydown", handleEscape);
-
-    return () => {
-      cancelAnimationFrame(firstFrame);
-      cancelAnimationFrame(secondFrame);
-      window.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [zoomMounted]);
-
-  useEffect(() => {
-    if (expanded) {
-      closeButtonRef.current?.focus({ preventScroll: true });
-    }
-  }, [expanded]);
-
-  // Só remove a camada depois de a animação terminar
-  function completeClose(event) {
-    if (event.target !== event.currentTarget) return;
-    if (event.propertyName !== "transform" || expanded) return;
-
-    setZoom(null);
-
-    requestAnimationFrame(() => {
-      lastClickedRef.current?.focus();
-    });
-  }
-
-  function changeSelectedStyle(style) {
-    setZoom((current) =>
-      current ? { ...current, style } : current
-    );
-  }
-
-  return (
-    <div className="cw-stage">
-
-      {/* Roda original na página */}
-      <div
-        ref={originalWheelRef}
-        className={`cw-original ${
-          zoomMounted ? "cw-original--hidden" : ""
-        }`}
-      >
-        <WheelFace onSelect={openZoom} />
-      </div>
-
-      {/* Roda ampliada por cima do ecrã */}
-      {zoom &&
-        createPortal(
-          <div
-            className={`cw-overlay ${
-              expanded ? "cw-overlay--open" : ""
-            }`}
-            role="dialog"
-            aria-modal="true"
-            aria-label={`Estilo de comunicação ${zoom.style.name}`}
-          >
-
-            <div
-              className="cw-overlay__backdrop"
-              onClick={closeZoom}
-            />
-
-            <div
-              className="cw-zoom-wheel"
-              onTransitionEnd={completeClose}
-              style={{
-                "--cw-size": `${zoom.size}px`,
-                "--cw-start-scale": zoom.startScale,
-                "--cw-shift-x": `${zoom.shiftX}px`,
-                "--cw-shift-y": `${zoom.shiftY}px`
-              }}
+            {/* SEGMENTOS DA RODA */}
+            <svg
+                viewBox="0 0 200 200"
+                className="animate-wheel size-full overflow-visible"
             >
 
-              <div className="cw-camera-rotation">
-                <WheelFace
-                  selectedStyle={zoom.style}
-                  expanded={expanded}
-                  onSelect={changeSelectedStyle}
-                  onClose={closeZoom}
-                  closeRef={closeButtonRef}
-                />
-              </div>
+                {STYLE_ORDER.map((k) => {
+
+                    if (!total) return null;
+
+                    const share =
+                        (scores ? scores[k] : 1) / total;
+
+                    const a0 = a + gap;
+                    const a1 = a + share * Math.PI * 2 - gap;
+
+                    const mid = (a0 + a1) / 2;
+
+                    a += share * Math.PI * 2;
+
+                    if (a1 <= a0) return null;
+
+                    const on = active === k;
+
+                    return (
+                        <path
+                            key={k}
+
+                            d={arc(
+                                100,
+                                100,
+                                58,
+                                96,
+                                a0,
+                                a1
+                            )}
+
+                            fill={STYLES[k].color}
+
+                            onMouseEnter={() => setHover(k)}
+                            onMouseLeave={() => setHover(null)}
+
+                            onClick={() => selectStyle(k)}
+
+                            role="button"
+                            tabIndex={0}
+
+                            aria-label={STYLES[k].tag}
+                            aria-pressed={selected === k}
+
+                            onKeyDown={(event) => {
+                                if (
+                                    event.key === "Enter" ||
+                                    event.key === " "
+                                ) {
+                                    event.preventDefault();
+                                    selectStyle(k);
+                                }
+                            }}
+
+                            style={{
+                                transform: on
+                                    ? `translate(${Math.cos(mid) * 4}px, ${Math.sin(mid) * 4}px)`
+                                    : undefined,
+
+                                opacity:
+                                    active && !on ? 0.55 : 1
+                            }}
+
+                            className="cursor-pointer transition-all duration-500 ease-out"
+                        />
+                    );
+
+                })}
+
+            </svg>
+
+            {/* CONTEÚDO CENTRAL DA RODA */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-center">
+
+                {currentStyle ? (
+
+                    <div
+                        key={currentStyle}
+                        className="animate-rise w-[52%]"
+                    >
+
+                        {scores ? (
+
+                            <>
+                                <p className="font-display text-2xl">
+                                    {STYLES[currentStyle].name}
+                                </p>
+
+                                <p className="text-sm text-muted-foreground">
+                                    {scores[currentStyle]}%
+                                </p>
+                            </>
+
+                        ) : (
+
+                            <p className="font-display text-2xl leading-snug">
+                                {STYLES[currentStyle].tag}
+                            </p>
+
+                        )}
+
+                    </div>
+
+                ) : center}
 
             </div>
-          </div>,
-          document.body
-        )}
 
-    </div>
-  );
+        </div>
+    );
 }
